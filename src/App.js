@@ -5,6 +5,13 @@ const axios = require('axios').default;
 class App extends React.Component {
   endPointUrl = 'https://api.unsplash.com';
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      images: []
+    }
+  }
+
   componentDidMount() {
     axios.get('/photos/random', {
       baseURL: this.endPointUrl,
@@ -13,31 +20,24 @@ class App extends React.Component {
         'Authorization': 'Client-ID h_uHNthSMyHx38lq4J-KHrHvF2LjLz2bWWjzEQRTzO0'
       },
       params: {
-        count: 9
+        count: 12
       }
     })
     .then(response => {
-      console.log(response);
-    })
+      this.setState({
+        images: response.data
+      })
+    });
   }
 
   render() {
+    const images = this.state.images;
     return(
       <div className="container mx-auto">
-        <div className="flex flex-row">
-          <div className="basis-1/3">01</div>
-          <div className="basis-1/3">02</div>
-          <div className="basis-1/3">03</div>
-        </div>
-        <div className="flex flex-row">
-          <div className="basis-1/3">01</div>
-          <div className="basis-1/3">02</div>
-          <div className="basis-1/3">03</div>
-        </div>
-        <div className="flex flex-row">
-          <div className="basis-1/3">01</div>
-          <div className="basis-1/3">02</div>
-          <div className="basis-1/3">03</div>
+        <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {
+            images.map(image => <div key={image.id} className=""><img key={image.id} src={image.urls.small} alt="Loading..."></img></div>)
+          }
         </div>
       </div>
     );
