@@ -2,12 +2,23 @@ import './App.css';
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 const axios = require('axios').default;
 
+/**
+ * Main component of the application.
+ */
 class App extends React.Component {
-  endPointUrl = 'https://api.unsplash.com';
-  
+  /** Base url of the unsplash api. */
+  unsplashBaseUrl = 'https://api.unsplash.com';
 
+  /**
+   * The application state is defined.
+   * The state contains all the images,
+   * the current index of an image that is displayed in an image
+   * and if the model is opened or closed.
+   * @param {*} props React props.
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -17,9 +28,19 @@ class App extends React.Component {
     }
   }
 
+  /**
+   * Load the first batch of images from usplash during the mount phase.
+   */
   componentDidMount() {
+    this.loadImages();
+  }
+
+  /**
+   * Load images from usplash and put them in the application state.
+   */
+  loadImages() {
     axios.get('/photos/random', {
-      baseURL: this.endPointUrl,
+      baseURL: this.unsplashBaseUrl,
       headers: {
         'Accept-Version': 'v1',
         'Authorization': 'Client-ID h_uHNthSMyHx38lq4J-KHrHvF2LjLz2bWWjzEQRTzO0'
@@ -28,9 +49,12 @@ class App extends React.Component {
         count: 12
       }
     })
+    .catch(error => {
+      console.error(error);
+    })
     .then(response => {
       this.setState({
-        images: response.data
+        images: [...this.state.images, ...response.data]
       })
     });
   }
@@ -38,7 +62,7 @@ class App extends React.Component {
   render() {
     const images = this.state.images;
     return(
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {
             images.map((image, index) => 
@@ -47,6 +71,9 @@ class App extends React.Component {
               </div>
             )
           }
+        </div>
+        <div className='flex justify-center pt-10'>
+          <div><Button variant="primary" onClick={() => this.loadImages()}>Load More</Button></div>
         </div>
         <ImageModal
           data={this.state.images[this.state.imageModelIndex]}
@@ -59,6 +86,10 @@ class App extends React.Component {
   
 }
 
+/**
+ * Open an image in a model and display extra data.
+ * @param {*} props Data from a single image.
+ */
 function ImageModal(props) {
   return (
     <Modal
